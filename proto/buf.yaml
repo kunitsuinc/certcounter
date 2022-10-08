@@ -1,0 +1,13 @@
+# NOTE: buf は deps の「解決を楽にするため」「バージョンを明示するため」「バージョンアップを用意にするため」だけに使う
+version: v1
+name: buf.build/ginokent/cloudcert
+breaking:
+  use:
+    - FILE
+deps:
+  - buf.build/googleapis/googleapis
+  - buf.build/envoyproxy/protoc-gen-validate
+lint:
+  allow_comment_ignores: true
+  use:
+    - DEFAULT
