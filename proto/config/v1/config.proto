@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package config.v1;
-option go_package = "github.com/ginokent/cloudcert/generated/go/proto/v1/config;configv1";
+option go_package = "github.com/kunitsuinc/certcounter/generated/go/proto/v1/config;configv1";
 
 import "google/protobuf/descriptor.proto";
 

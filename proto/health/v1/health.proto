@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package health.v1;
-option go_package = "github.com/ginokent/cloudcert/generated/go/proto/v1/health;healthv1";
+option go_package = "github.com/kunitsuinc/certcounter/generated/go/proto/v1/health;healthv1";
 
 import "google/api/annotations.proto";
 
@@ -15,8 +15,7 @@ message HealthServiceCheckResponse {
 }
 
 service HealthService {
-  rpc Check(HealthServiceCheckRequest)
-      returns (HealthServiceCheckResponse) {
+  rpc Check(HealthServiceCheckRequest) returns (HealthServiceCheckResponse) {
     option (google.api.http) = {
       get: "/api/v1/health/check"
     };

@@ -1,6 +1,6 @@
 # NOTE: buf は deps の「解決を楽にするため」「バージョンを明示するため」「バージョンアップを用意にするため」だけに使う
 version: v1
-name: buf.build/ginokent/cloudcert
+name: buf.build/ginokent/certcounter
 breaking:
   use:
     - FILE
