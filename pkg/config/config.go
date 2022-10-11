@@ -25,7 +25,7 @@ const (
 	SPAN_EXPORTER        = "SPAN_EXPORTER"
 )
 
-type config struct {
+type Config struct {
 	Debug              bool
 	AppEnv             string
 	Addr               string
@@ -39,7 +39,7 @@ type config struct {
 
 // nolint: gochecknoglobals
 var (
-	cfg   config
+	cfg   = &Config{}
 	cfgMu sync.Mutex
 )
 
@@ -67,9 +67,7 @@ func Load(l *rec.Logger) {
 
 	cfg.ShutdownTimeout = time.Duration(timeout) * time.Second
 
-	if Debug() {
-		l.Debug("config", rec.Object("config", cfg))
-	}
+	l.Info("config: loaded", rec.Object("config", cfg))
 }
 
 // nolint: cyclop

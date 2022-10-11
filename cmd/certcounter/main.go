@@ -34,42 +34,40 @@ func Main(ctx context.Context, l *rec.Logger) error {
 	ctx = contextz.WithSignalChannel(ctx, shutdownChan)
 
 	config.Load(l)
-
-	l.Info("version info",
-		rec.Object("version", map[string]string{
-			"Version":   config.Version(),
-			"Revision":  config.Revision(),
-			"Branch":    config.Branch(),
-			"Timestamp": config.Timestamp(),
-			"GoVersion": config.GoVersion(),
-		}),
-	)
-
+	l.Info("version info", rec.Object("version", map[string]string{"Version": config.Version(), "Revision": config.Revision(), "Branch": config.Branch(), "Timestamp": config.Timestamp(), "GoVersion": config.GoVersion()}))
 	if config.SubcommandVersion() {
 		return nil
 	}
-
-	l.F().Infof("main: 🔆 start %s", consts.AppName)
-	defer l.F().Infof("main: 💤 shutdown %s", consts.AppName)
-
 	must.Must(config.Check())
 
-	shutdown, errCh := entrypoint.CertCounter(ctx, l)
+	l.F().Infof("main: 🔆 start %s (pid:%d)", consts.AppName, os.Getpid())
+	defer func() { l.F().Infof("main: 💤 shutdown %s (pid:%d)", consts.AppName, os.Getpid()) }()
 
-	select {
-	case <-ctx.Done():
-		l.E().Info(ctx.Err())
-	case sig := <-shutdownChan:
-		l.F().Infof("catch the signal: %s", sig)
-	case err := <-errCh:
-		if err != nil {
-			return errors.Errorf("entrypoint.StartGRPCGatewayAsync: %w", err)
+	shutdown, errCh := entrypoint.CertCounter(ctx, l)
+	defer func() {
+		shutdown()
+		time.Sleep(1 * time.Millisecond) // NOTE: wait shutdown log
+	}()
+
+SignalLoop:
+	for {
+		select {
+		case <-ctx.Done():
+			l.E().Info(ctx.Err())
+			break SignalLoop
+		case sig := <-shutdownChan:
+			if sig == syscall.SIGHUP {
+				l.Info("load")
+				continue
+			}
+			l.F().Infof("main: catch the signal: %s", sig)
+			break SignalLoop
+		case err := <-errCh:
+			if err != nil {
+				return errors.Errorf("entrypoint.StartGRPCGatewayAsync: %w", err)
+			}
 		}
 	}
-
-	shutdown()
-
-	time.Sleep(1 * time.Millisecond) // NOTE: wait shutdown log
 
 	return nil
 }

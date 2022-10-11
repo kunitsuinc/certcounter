@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
-CommandNotFound() { for cmd in "${@:?"CommandNotFound: \$@ as commands is required"}"; do if ! command -v "${cmd:?}" >/dev/null; then echo "${cmd:?}"; return 0; fi; done; return 1; }
-if CommandNotFound jq; then
-  cat
-else
-  cat | jq -Rr '. as $line | try fromjson catch $line'
-fi
+CommandNotFound() { for cmd in "${@:?"CommandNotFound: \$@ as commands is required"}"; do if ! command -v "${cmd:?}" >/dev/null; then echo "${cmd:?}" && return 0; fi; done || : && return 1; } && export -f CommandNotFound
+
+__main__() {
+  if CommandNotFound jq >/dev/null; then
+    echo "jq: command not found" >&2
+    exit 1
+  fi
+
+  if [[ $# -gt 0 ]]; then
+    jq -Rr '. as $line | try fromjson catch $line' "${@:?}"
+  else
+    cat | jq -Rr '. as $line | try fromjson catch $line'
+  fi
+}
+
+__main__ "$@"

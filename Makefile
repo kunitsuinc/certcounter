@@ -93,8 +93,11 @@ gobuild: ## Run go build
 
 .PHONY: run
 run: gobuild ## Run go build and exec
-	# ./.local/bin/certcounter | ./.bin/jqlog
 	./.local/bin/certcounter
+
+.PHONY: runjq
+runjq: gobuild ## Run go build and exec with jq
+	./.local/bin/certcounter | ./.bin/jqlog
 
 .PHONY: air
 air:  ## Run air
