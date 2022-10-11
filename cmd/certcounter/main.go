@@ -50,11 +50,13 @@ func Main(ctx context.Context, l *rec.Logger) error {
 		return nil
 	}
 
+	l.With(rec.String("command", os.Args[0]), rec.Strings("args", os.Args[1:]), rec.Int("pid", os.Getpid())).F().Infof("main: 🔆 start %s command=%s args=%v pid=%d", consts.AppName, os.Args[0], os.Args[1:], os.Getpid())
+	defer func() {
+		l.With(rec.String("command", os.Args[0]), rec.Strings("args", os.Args[1:]), rec.Int("pid", os.Getpid())).F().Infof("main: 💤 shutdown %s command=%s args=%v pid=%d", consts.AppName, os.Args[0], os.Args[1:], os.Getpid())
+	}()
+
 	// NOTE: If err != nil, panic(err)
 	must.Must(err)
-
-	l.F().Infof("main: 🔆 start %s (pid:%d)", consts.AppName, os.Getpid())
-	defer func() { l.F().Infof("main: 💤 shutdown %s (pid:%d)", consts.AppName, os.Getpid()) }()
 
 	shutdown, errChanCertCounter := entrypoint.CertCounter(ctx, l)
 	defer func() {
