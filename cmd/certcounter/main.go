@@ -34,11 +34,10 @@ func Main(ctx context.Context, l *rec.Logger) error {
 	signal.Notify(shutdownChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	ctx = contextz.WithSignalChannel(ctx, shutdownChan)
 
-	rollback, err := config.Load(l)
-	defer rollback()
+	_, errConfigLoad := config.Load(l)
 
 	// NOTE: If -h option, return nil
-	if errors.Is(err, flag.ErrHelp) {
+	if errors.Is(errConfigLoad, flag.ErrHelp) {
 		return nil
 	}
 
@@ -56,7 +55,7 @@ func Main(ctx context.Context, l *rec.Logger) error {
 	}()
 
 	// NOTE: If err != nil, panic(err)
-	must.Must(err)
+	must.Must(errConfigLoad)
 
 	shutdown, errChanCertCounter := entrypoint.CertCounter(ctx, l)
 	defer func() {
