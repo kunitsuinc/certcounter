@@ -4,6 +4,7 @@ linters:
   disable:
     - exhaustruct # https://github.com/GaijinEntertainment/go-exhaustruct
     - exhaustivestruct # https://github.com/mbilski/exhaustivestruct
+    - godox
     - golint # deprecated https://github.com/golang/lint
     - gomnd # https://github.com/tommy-muehle/go-mnd
     - ifshort # for readability

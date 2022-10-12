@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/kunitsuinc/certcounter/pkg/config"
 	"github.com/kunitsuinc/certcounter/pkg/consts"
@@ -41,9 +42,11 @@ func CertCounter(ctx context.Context, l *rec.Logger) (shutdown func(), errChan <
 
 	grpcServer := router.NewGRPCServer(l)
 
-	handler := grpcz.GRPCHandler(grpcServer, mux, &http2.Server{})
-
-	server := &http.Server{Addr: address, Handler: handler}
+	server := &http.Server{
+		Addr:              address,
+		Handler:           grpcz.GRPCHandler(router.NewGRPCServer(l), mux, &http2.Server{}),
+		ReadHeaderTimeout: 10 * time.Second,
+	}
 
 	go func() {
 		l.F().Infof("🔊 start gRPC Server with gRPC-Gateway: %s", address)

@@ -79,7 +79,7 @@ func InitTracerProvider(exporter sdktrace.SpanExporter, traceResource *resource.
 	tracer = tracerProvider.Tracer(consts.TracerName)
 	tracerMutex.Unlock()
 
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})) // NOTE: TextMapPropagator について調べる
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})) // TODO: TextMapPropagator について調べる
 
 	shutdown = func() {
 		defer l.Info("trace: 🔕 shutdown OpenTelemetry Tracer Provider")

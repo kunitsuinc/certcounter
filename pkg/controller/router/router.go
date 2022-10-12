@@ -3,8 +3,6 @@ package router
 import (
 	"context"
 	"net/http"
-	"reflect"
-	"runtime"
 	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -16,6 +14,7 @@ import (
 	"github.com/kunitsuinc/certcounter/pkg/interceptor"
 	"github.com/kunitsuinc/certcounter/pkg/middleware"
 	testapiv1 "github.com/kunitsuinc/certcounter/proto/generated/go/testapi/v1"
+	gw_runtimez "github.com/kunitsuinc/grpcutil.go/grpc-gateway/v2/runtimez"
 	"github.com/kunitsuinc/rec.go"
 	"github.com/kunitsuinc/util.go/net/httpz"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -65,30 +64,19 @@ func NewGRPCGatewayRouter(ctx context.Context, grpcServerEndpoint string, l *rec
 		}),
 	}
 
-	register := func(ctx context.Context, mux *gw_runtime.ServeMux, endpoint string, opts []grpc.DialOption, fs ...func(ctx context.Context, mux *gw_runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error)) error {
-		for _, f := range fs {
-			if err := f(ctx, mux, endpoint, opts); err != nil {
-				fv := reflect.ValueOf(f)
-				return errors.Errorf("%s: %w", runtime.FuncForPC(fv.Pointer()).Name(), err)
-			}
-		}
-		return nil
-	}
-
 	// register handlers
-	if err := register(ctx, mux, grpcServerEndpoint, opts,
+	if err := gw_runtimez.RegisterHandlersFromEndpoint(ctx, mux, grpcServerEndpoint, opts,
 		testapiv1.RegisterTestAPIServiceHandlerFromEndpoint,
 	); err != nil {
-		return nil, errors.Errorf("certcounter.RegisterTestAPIHandlerFromEndpoint: %w", err)
+		return nil, errors.Errorf("gw_runtimez.RegisterHandlersFromEndpoint: %w", err)
 	}
 
-	middlewares := httpz.Middlewares(
-		httpz.NewResponseWriterBufferHandler(func(rwb *httpz.ResponseWriterBuffer, r *http.Request) {
+	middlewares := httpz.
+		Middlewares(httpz.NewResponseWriterBufferHandler(func(rwb *httpz.ResponseWriterBuffer, r *http.Request) {
 			l := rec.ContextLogger(r.Context())
 			l.With(rec.Int("statusCode", rwb.StatusCode), rec.Int64("contentLength", int64(rwb.Buffer.Len()))).F().Infof("access: %d %s (Content-Length:%d) <- %s %s (Content-Length:%d)", rwb.StatusCode, http.StatusText(rwb.StatusCode), rwb.Buffer.Len(), r.Method, r.URL.Path, r.ContentLength)
-		}).Middleware,
-		middleware.ContextLoggerRequestMiddleware(l),
-	)
+		}).Middleware).
+		Middlewares(middleware.ContextLoggerRequestMiddleware(l))
 
 	// NOTE: OpenTelemetry for client -> gRPC Gateway
 	otelHandler := otelhttp.NewHandler(
