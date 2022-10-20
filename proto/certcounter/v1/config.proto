@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package certcounter.v1;
+option go_package = ".;v1";
+
+// buf:lint:ignore ENUM_VALUE_UPPER_SNAKE_CASE
+// buf:lint:ignore ENUM_VALUE_PREFIX
+enum AppEnv {
+  APP_ENV_UNSPECIFIED = 0;
+  local = 1;
+  development = 2;
+  staging = 3;
+  production = 4;
+}

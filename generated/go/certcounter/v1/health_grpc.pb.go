@@ -2,15 +2,16 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: health/v1/health.proto
+// source: certcounter/v1/health.proto
 
-package healthv1
+package v1
 
 import (
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -22,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type HealthServiceClient interface {
-	Check(ctx context.Context, in *HealthServiceCheckRequest, opts ...grpc.CallOption) (*HealthServiceCheckResponse, error)
+	Check(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*HealthServiceCheckResponse, error)
 }
 
 type healthServiceClient struct {
@@ -33,9 +34,9 @@ func NewHealthServiceClient(cc grpc.ClientConnInterface) HealthServiceClient {
 	return &healthServiceClient{cc}
 }
 
-func (c *healthServiceClient) Check(ctx context.Context, in *HealthServiceCheckRequest, opts ...grpc.CallOption) (*HealthServiceCheckResponse, error) {
+func (c *healthServiceClient) Check(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*HealthServiceCheckResponse, error) {
 	out := new(HealthServiceCheckResponse)
-	err := c.cc.Invoke(ctx, "/health.v1.HealthService/Check", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/certcounter.v1.HealthService/Check", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +47,7 @@ func (c *healthServiceClient) Check(ctx context.Context, in *HealthServiceCheckR
 // All implementations must embed UnimplementedHealthServiceServer
 // for forward compatibility
 type HealthServiceServer interface {
-	Check(context.Context, *HealthServiceCheckRequest) (*HealthServiceCheckResponse, error)
+	Check(context.Context, *emptypb.Empty) (*HealthServiceCheckResponse, error)
 	mustEmbedUnimplementedHealthServiceServer()
 }
 
@@ -54,7 +55,7 @@ type HealthServiceServer interface {
 type UnimplementedHealthServiceServer struct {
 }
 
-func (UnimplementedHealthServiceServer) Check(context.Context, *HealthServiceCheckRequest) (*HealthServiceCheckResponse, error) {
+func (UnimplementedHealthServiceServer) Check(context.Context, *emptypb.Empty) (*HealthServiceCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (UnimplementedHealthServiceServer) mustEmbedUnimplementedHealthServiceServer() {}
@@ -71,7 +72,7 @@ func RegisterHealthServiceServer(s grpc.ServiceRegistrar, srv HealthServiceServe
 }
 
 func _HealthService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthServiceCheckRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -80,10 +81,10 @@ func _HealthService_Check_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/health.v1.HealthService/Check",
+		FullMethod: "/certcounter.v1.HealthService/Check",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HealthServiceServer).Check(ctx, req.(*HealthServiceCheckRequest))
+		return srv.(HealthServiceServer).Check(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -92,7 +93,7 @@ func _HealthService_Check_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var HealthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "health.v1.HealthService",
+	ServiceName: "certcounter.v1.HealthService",
 	HandlerType: (*HealthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -101,5 +102,5 @@ var HealthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "health/v1/health.proto",
+	Metadata: "certcounter/v1/health.proto",
 }

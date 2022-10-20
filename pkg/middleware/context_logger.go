@@ -12,7 +12,8 @@ func ContextLoggerRequestMiddleware(original *rec.Logger) func(next http.Handler
 		return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			next.ServeHTTP(rw, r.WithContext(rec.ContextWithLogger(r.Context(),
 				original.With(
-					rec.String("remoteAddr", r.Header.Get(httpz.HeaderXRealIP)),
+					rec.String("remoteAddr", r.RemoteAddr),
+					rec.String("xRealIP", r.Header.Get(httpz.HeaderXRealIP)),
 					rec.String("method", r.Method),
 					rec.String("host", r.Host),
 					rec.String("path", r.URL.Path),

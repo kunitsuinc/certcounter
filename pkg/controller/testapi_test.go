@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	v1 "github.com/kunitsuinc/certcounter/generated/go/certcounter/v1"
 	"github.com/kunitsuinc/certcounter/pkg/controller"
-	testapiv1 "github.com/kunitsuinc/certcounter/proto/generated/go/testapi/v1"
 )
 
 func TestTestAPIController_Echo(t *testing.T) {
@@ -14,7 +14,7 @@ func TestTestAPIController_Echo(t *testing.T) {
 		t.Parallel()
 		tr := &controller.TestAPIController{}
 		const wantMessage = "test"
-		gotResponse, err := tr.Echo(context.Background(), &testapiv1.TestAPIServiceEchoRequest{Message: wantMessage})
+		gotResponse, err := tr.Echo(context.Background(), &v1.TestAPIServiceEchoRequest{Message: wantMessage})
 		if err != nil {
 			t.Errorf("TestAPIController.Echo() error = %v, wantErr %v", err, nil)
 			return

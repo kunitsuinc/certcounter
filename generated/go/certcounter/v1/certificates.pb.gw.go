@@ -2,11 +2,11 @@
 // source: certcounter/v1/certificates.proto
 
 /*
-Package certcounterv1 is a reverse proxy.
+Package v1 is a reverse proxy.
 
 It translates gRPC into RESTful JSON APIs.
 */
-package certcounterv1
+package v1
 
 import (
 	"context"

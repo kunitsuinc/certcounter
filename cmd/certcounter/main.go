@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/kunitsuinc/certcounter/pkg/config"
 	"github.com/kunitsuinc/certcounter/pkg/consts"
@@ -29,10 +28,11 @@ func main() {
 	}
 }
 
+// nolint: cyclop
 func Main(ctx context.Context, l *rec.Logger) error {
-	shutdownChan := make(chan os.Signal, 1)
-	signal.Notify(shutdownChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
-	ctx = contextz.WithSignalChannel(ctx, shutdownChan)
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
+	ctx = contextz.WithSignalChannel(ctx, signalChan)
 
 	_, errConfigLoad := config.Load(l)
 
@@ -57,36 +57,37 @@ func Main(ctx context.Context, l *rec.Logger) error {
 	// NOTE: If err != nil, panic(err)
 	must.Must(errConfigLoad)
 
-	shutdown, errChanCertCounter := entrypoint.CertCounter(ctx, l)
-	defer func() {
-		shutdown()
-		time.Sleep(1 * time.Millisecond) // NOTE: wait shutdown log
-	}()
+	serve, shutdown := entrypoint.CertCounter(ctx, l)
 
-SignalLoop:
+	serveErrChan := make(chan error, 1)
+	go serve(serveErrChan)
+
 	for {
 		select {
 		case <-ctx.Done():
 			l.E().Info(ctx.Err())
-			break SignalLoop
-		case sig := <-shutdownChan:
+			if err := shutdown(); err != nil {
+				l.With(rec.Error(err), rec.ErrorStacktrace(err)).F().Errorf("main: %v", err)
+			}
+		case sig := <-signalChan:
 			l.F().Infof("main: catch the signal: %s", sig)
 			if sig == syscall.SIGHUP {
 				l.Info("main: reload config")
 				rollback, err := config.Load(l)
 				if err != nil {
-					l.Info("main: failed to load config. rollback")
+					l.Warning("main: failed to load config. rollback")
 					rollback()
 				}
 				continue
 			}
-			break SignalLoop
-		case err := <-errChanCertCounter:
-			if err != nil {
-				return errors.Errorf("main: entrypoint.CertCounter: %w", err)
+			if err := shutdown(); err != nil {
+				l.With(rec.Error(err), rec.ErrorStacktrace(err)).F().Errorf("main: %v", err)
 			}
+		case err := <-serveErrChan:
+			if err != nil {
+				return errors.Errorf("entrypoint.CertCounter: serve: %w", err)
+			}
+			return nil
 		}
 	}
-
-	return nil
 }

@@ -1,14 +1,16 @@
-SHELL        := /usr/bin/env bash -Eeu -o pipefail
-GITROOT      := $(shell git rev-parse --show-toplevel || pwd || echo '.')
-MAKEFILE_DIR := $(subst /,,$(dir $(lastword ${MAKEFILE_LIST})))
-PRE_PUSH     := ${GITROOT}/.git/hooks/pre-push
-GOMODULE     := github.com/kunitsuinc/certcounter
-VERSION      := $(shell git describe --tags --abbrev=0 --always)
-REVISION     := $(shell git log -1 --format='%H')
-BRANCH       := $(shell git rev-parse --abbrev-ref HEAD)
-TIMESTAMP    := $(shell git log -1 --format='%cI')
-IMAGE_TAG    := ${REVISION}
-LOCAL_CR     := ${GOMODULE}
+SHELL           := /usr/bin/env bash -Eeu -o pipefail
+GITROOT         := $(shell git rev-parse --show-toplevel || pwd || echo '.')
+MAKEFILE_DIR    := $(subst /,,$(dir $(lastword ${MAKEFILE_LIST})))
+PRE_PUSH        := ${GITROOT}/.git/hooks/pre-push
+GOMODULE        := github.com/kunitsuinc/certcounter
+VERSION         := $(shell git describe --tags --abbrev=0 --always)
+REVISION        := $(shell git log -1 --format='%H')
+BRANCH          := $(shell git rev-parse --abbrev-ref HEAD)
+TIMESTAMP       := $(shell git log -1 --format='%cI')
+GO_BUILD_OUTPUT := ./.local/bin/certcounter
+GO_BUILD        := go build -o ${GO_BUILD_OUTPUT} -ldflags "-X ${GOMODULE}/pkg/config.version=${VERSION} -X ${GOMODULE}/pkg/config.revision=${REVISION} -X ${GOMODULE}/pkg/config.branch=${BRANCH} -X ${GOMODULE}/pkg/config.timestamp=${TIMESTAMP}" ./cmd/certcounter/...
+IMAGE_TAG       := ${REVISION}
+LOCAL_CR        := ${GOMODULE}
 
 .DEFAULT_GOAL := help
 .PHONY: help
@@ -36,17 +38,23 @@ buf-mod-update: ## Run buf mod update
 buf: ## Run buf generate
 	cd proto && ${GITROOT}/.bin/buf --debug --verbose generate
 
+clean:  ## Clean up chace, etc
+		go clean -x -cache -testcache -modcache -fuzzcache
+		golangci-lint cache clean
+
 .PHONY: lint
-lint:  ## Run golangci-lint after go mod tidy.
+lint:  ## Run golangci-lint after go mod tidy
 	# tidy
 	go mod tidy
 	git diff --exit-code go.mod go.sum
 	# buf
 	buf lint ./proto
 	# lint
-	# cf. https://golangci-lint.run/usage/linters/
+	# ref. https://golangci-lint.run/usage/linters/
 	./.bin/golangci-lint run --fix --sort-results
 	git diff --exit-code
+	# ref. https://github.com/secretlint/secretlint
+	docker run -v `pwd`:`pwd` -w `pwd` --rm -it secretlint/secretlint secretlint "**/*"
 
 .PHONY: setup
 setup: githooks protocgens ## Setup tools for development
@@ -89,19 +97,20 @@ logs:  ## docker compose logs -f
 
 .PHONY: gobuild
 gobuild: ## Run go build
-	go build -o .local/bin/certcounter -ldflags "-X ${GOMODULE}/pkg/config.version=${VERSION} -X ${GOMODULE}/pkg/config.revision=${REVISION} -X ${GOMODULE}/pkg/config.branch=${BRANCH} -X ${GOMODULE}/pkg/config.timestamp=${TIMESTAMP}" ./cmd/certcounter/...
+	${GO_BUILD}
 
 .PHONY: run
 run: gobuild ## Run go build and exec
-	./.local/bin/certcounter
+	${GO_BUILD_OUTPUT}
 
 .PHONY: runjq
 runjq: gobuild ## Run go build and exec with jq
-	./.local/bin/certcounter | ./.bin/jqlog
+	${GO_BUILD_OUTPUT} | ./.bin/jqlog
 
 .PHONY: air
 air:  ## Run air
-	air --build.cmd 'go build -o .local/bin/certcounter -ldflags "-X ${GOMODULE}/pkg/config.version=${VERSION} -X ${GOMODULE}/pkg/config.revision=${REVISION} -X ${GOMODULE}/pkg/config.branch=${BRANCH} -X ${GOMODULE}/pkg/config.timestamp=${TIMESTAMP}" ./cmd/certcounter/...' --build.bin './.local/bin'
+	@[[ -x "${GITROOT}/.local/bin/air" ]] || bash -cx "curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b ${GITROOT}/.local/bin && chmod +x ${GITROOT}/.local/bin/air"
+	air -tmp_dir ./.tmp -log.time true -build.send_interrupt true -build.exclude_regex "_test\.go" -build.cmd '${GO_BUILD}' -build.bin '${GO_BUILD_OUTPUT}'
 
 .PHONY: build
 build:  ## docker build -t ${LOCAL_CR}:${IMAGE_TAG}

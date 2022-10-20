@@ -1,10 +1,16 @@
 syntax = "proto3";
 
-package testapi.v1;
-option go_package = "github.com/kunitsuinc/certcounter/generated/go/proto/v1/testapi;testapiv1";
+package certcounter.v1;
+option go_package = ".;v1";
 
 import "google/api/annotations.proto";
+import "google/protobuf/descriptor.proto";
+import "google/protobuf/empty.proto";
 import "validate/validate.proto";
+
+//
+// TestAPI
+//
 
 message TestAPIServiceEchoRequest {
   string message = 1 [(validate.rules).string.min_len = 1];
@@ -14,12 +20,9 @@ message TestAPIServiceEchoResponse {
   string message = 1;
 }
 
-message TestAPIServiceRaiseErrorRequest {
-  string message = 1;
-}
-
-message TestAPIServiceRaiseErrorResponse {
-  string message = 1;
+message TestAPIServiceEchoErrorRequest {
+  uint32 code = 1;
+  string message = 2;
 }
 
 service TestAPIService {
@@ -31,11 +34,12 @@ service TestAPIService {
     };
   }
 
-  // RaiseError は意図的にエラーを発生させます
-  rpc RaiseError(TestAPIServiceRaiseErrorRequest)
-      returns (TestAPIServiceRaiseErrorResponse) {
+  // EchoError は意図的にエラーを発生させます
+  rpc EchoError(TestAPIServiceEchoErrorRequest)
+      returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      get: "/api/v1/testapi/raise_error"
+      post: "/api/v1/testapi/echo_error"
+      body: "*"
     };
   }
 }

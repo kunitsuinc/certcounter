@@ -8,7 +8,7 @@ import (
 
 	"github.com/kunitsuinc/certcounter/pkg/errors"
 	"github.com/kunitsuinc/rec.go"
-	"github.com/kunitsuinc/util.go/env"
+	"github.com/kunitsuinc/util.go/flagenv"
 	"github.com/kunitsuinc/util.go/pointer"
 )
 
@@ -16,6 +16,7 @@ var ErrFlagOrEnvIsNotEnough = errors.New("config: flag or environment variable i
 
 // nolint: revive,stylecheck
 const (
+	VERSION              = "VERSION"
 	DEBUG                = "DEBUG"
 	APP_ENV              = "APP_ENV"
 	ADDR                 = "ADDR"
@@ -32,7 +33,6 @@ type Config struct {
 	AppEnv             string
 	Addr               string
 	Port               int
-	GRPCEndpoint       string
 	ShutdownTimeout    time.Duration
 	AWSProfile         string
 	GoogleCloudProject string
@@ -58,40 +58,35 @@ func Load(l *rec.Logger) (rollback func(), err error) {
 		l.Info("config: loaded", rec.Object("config", cfg))
 	}
 
-	var timeout int64
-
-	fs := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+	fs := flagenv.NewFlagEnvSet(os.Args[0], flag.ContinueOnError)
 	// version
-	fs.BoolVar(&subcommandVersion, "v", false, "Display version info")
-	fs.BoolVar(&subcommandVersion, "version", subcommandVersion || false, "Display version info")
+	fs.BoolVar(&subcommandVersion, "v", VERSION, false, "Display version info")
+	fs.BoolVar(&subcommandVersion, "version", VERSION, subcommandVersion || false, "Display version info")
 	// config
-	fs.BoolVar(&cfg.Debug, "debug", env.BoolOrDefault(DEBUG, false), "Debug")
-	fs.StringVar(&cfg.AppEnv, "appenv", env.StringOrDefault(APP_ENV, ""), "TODO")
-	fs.StringVar(&cfg.Addr, "addr", env.StringOrDefault(ADDR, "0.0.0.0"), "TODO")
-	fs.IntVar(&cfg.Port, "port", env.IntOrDefault(PORT, 8080), "TODO")
-	fs.StringVar(&cfg.GRPCEndpoint, "grpc-endpoint", env.StringOrDefault(ADDR, "0.0.0.0:9090"), "TODO")
-	fs.Int64Var(&timeout, "shutdown-timeout", env.Int64OrDefault(SHUTDOWN_TIMEOUT, 10), "TODO")
-	fs.StringVar(&cfg.AWSProfile, "aws-profile", env.StringOrDefault(AWS_PROFILE, ""), "TODO")
-	fs.StringVar(&cfg.GoogleCloudProject, "gcp-project", env.StringOrDefault(GOOGLE_CLOUD_PROJECT, ""), "TODO")
-	fs.StringVar(&cfg.SpanExporter, "span-exporter", env.StringOrDefault(SPAN_EXPORTER, "gcloud"), "TODO")
+	fs.BoolVar(&cfg.Debug, "debug", DEBUG, false, "Debug")
+	fs.StringVar(&cfg.AppEnv, "appenv", APP_ENV, "", "TODO")
+	fs.StringVar(&cfg.Addr, "addr", ADDR, "0.0.0.0", "TODO")
+	fs.IntVar(&cfg.Port, "port", PORT, 8080, "TODO")
+	fs.SecondVar(&cfg.ShutdownTimeout, "shutdown-timeout", SHUTDOWN_TIMEOUT, 10*time.Second, "TODO")
+	fs.StringVar(&cfg.AWSProfile, "aws-profile", AWS_PROFILE, "", "TODO")
+	fs.StringVar(&cfg.GoogleCloudProject, "gcp-project", GOOGLE_CLOUD_PROJECT, "", "TODO")
+	fs.StringVar(&cfg.SpanExporter, "span-exporter", SPAN_EXPORTER, "gcloud", "TODO")
 	// parse
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		return rollback, errors.Errorf("(*flag.FlagSet).Parse: %w", err)
 	}
 
-	cfg.ShutdownTimeout = time.Duration(timeout) * time.Second
-
 	l.Info("config: loaded", rec.Object("config", cfg))
 
+	// AND
 	switch {
 	case cfg.Addr == "":
 		return rollback, errors.Errorf("%s: %w", ADDR, ErrFlagOrEnvIsNotEnough)
 	case cfg.Port == 0:
 		return rollback, errors.Errorf("%s: %w", PORT, ErrFlagOrEnvIsNotEnough)
-	case cfg.GRPCEndpoint == "":
-		return rollback, errors.Errorf("%s: %w", GRPC_ENDPOINT, ErrFlagOrEnvIsNotEnough)
 	}
 
+	// OR
 	switch {
 	case cfg.AWSProfile != "":
 		break
@@ -108,7 +103,6 @@ func Debug() bool                    { return cfg.Debug }
 func AppEnv() string                 { return cfg.AppEnv }
 func Addr() string                   { return cfg.Addr }
 func Port() int                      { return cfg.Port }
-func GRPCEndpoint() string           { return cfg.GRPCEndpoint }
 func ShutdownTimeout() time.Duration { return cfg.ShutdownTimeout }
 func AWSProfile() string             { return cfg.AWSProfile }
 func GoogleCloudProject() string     { return cfg.GoogleCloudProject }

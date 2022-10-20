@@ -2,15 +2,16 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: testapi/v1/testapi.proto
+// source: certcounter/v1/testapi.proto
 
-package testapiv1
+package v1
 
 import (
 	context "context"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -24,8 +25,8 @@ const _ = grpc.SupportPackageIsVersion7
 type TestAPIServiceClient interface {
 	// Echo は受け取った message を返却します
 	Echo(ctx context.Context, in *TestAPIServiceEchoRequest, opts ...grpc.CallOption) (*TestAPIServiceEchoResponse, error)
-	// RaiseError は意図的にエラーを発生させます
-	RaiseError(ctx context.Context, in *TestAPIServiceRaiseErrorRequest, opts ...grpc.CallOption) (*TestAPIServiceRaiseErrorResponse, error)
+	// EchoError は意図的にエラーを発生させます
+	EchoError(ctx context.Context, in *TestAPIServiceEchoErrorRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type testAPIServiceClient struct {
@@ -38,16 +39,16 @@ func NewTestAPIServiceClient(cc grpc.ClientConnInterface) TestAPIServiceClient {
 
 func (c *testAPIServiceClient) Echo(ctx context.Context, in *TestAPIServiceEchoRequest, opts ...grpc.CallOption) (*TestAPIServiceEchoResponse, error) {
 	out := new(TestAPIServiceEchoResponse)
-	err := c.cc.Invoke(ctx, "/testapi.v1.TestAPIService/Echo", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/certcounter.v1.TestAPIService/Echo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *testAPIServiceClient) RaiseError(ctx context.Context, in *TestAPIServiceRaiseErrorRequest, opts ...grpc.CallOption) (*TestAPIServiceRaiseErrorResponse, error) {
-	out := new(TestAPIServiceRaiseErrorResponse)
-	err := c.cc.Invoke(ctx, "/testapi.v1.TestAPIService/RaiseError", in, out, opts...)
+func (c *testAPIServiceClient) EchoError(ctx context.Context, in *TestAPIServiceEchoErrorRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/certcounter.v1.TestAPIService/EchoError", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,8 +61,8 @@ func (c *testAPIServiceClient) RaiseError(ctx context.Context, in *TestAPIServic
 type TestAPIServiceServer interface {
 	// Echo は受け取った message を返却します
 	Echo(context.Context, *TestAPIServiceEchoRequest) (*TestAPIServiceEchoResponse, error)
-	// RaiseError は意図的にエラーを発生させます
-	RaiseError(context.Context, *TestAPIServiceRaiseErrorRequest) (*TestAPIServiceRaiseErrorResponse, error)
+	// EchoError は意図的にエラーを発生させます
+	EchoError(context.Context, *TestAPIServiceEchoErrorRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTestAPIServiceServer()
 }
 
@@ -72,8 +73,8 @@ type UnimplementedTestAPIServiceServer struct {
 func (UnimplementedTestAPIServiceServer) Echo(context.Context, *TestAPIServiceEchoRequest) (*TestAPIServiceEchoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
 }
-func (UnimplementedTestAPIServiceServer) RaiseError(context.Context, *TestAPIServiceRaiseErrorRequest) (*TestAPIServiceRaiseErrorResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RaiseError not implemented")
+func (UnimplementedTestAPIServiceServer) EchoError(context.Context, *TestAPIServiceEchoErrorRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EchoError not implemented")
 }
 func (UnimplementedTestAPIServiceServer) mustEmbedUnimplementedTestAPIServiceServer() {}
 
@@ -98,7 +99,7 @@ func _TestAPIService_Echo_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/testapi.v1.TestAPIService/Echo",
+		FullMethod: "/certcounter.v1.TestAPIService/Echo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(TestAPIServiceServer).Echo(ctx, req.(*TestAPIServiceEchoRequest))
@@ -106,20 +107,20 @@ func _TestAPIService_Echo_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TestAPIService_RaiseError_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TestAPIServiceRaiseErrorRequest)
+func _TestAPIService_EchoError_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestAPIServiceEchoErrorRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TestAPIServiceServer).RaiseError(ctx, in)
+		return srv.(TestAPIServiceServer).EchoError(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/testapi.v1.TestAPIService/RaiseError",
+		FullMethod: "/certcounter.v1.TestAPIService/EchoError",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TestAPIServiceServer).RaiseError(ctx, req.(*TestAPIServiceRaiseErrorRequest))
+		return srv.(TestAPIServiceServer).EchoError(ctx, req.(*TestAPIServiceEchoErrorRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,7 +129,7 @@ func _TestAPIService_RaiseError_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TestAPIService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "testapi.v1.TestAPIService",
+	ServiceName: "certcounter.v1.TestAPIService",
 	HandlerType: (*TestAPIServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -136,10 +137,10 @@ var TestAPIService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TestAPIService_Echo_Handler,
 		},
 		{
-			MethodName: "RaiseError",
-			Handler:    _TestAPIService_RaiseError_Handler,
+			MethodName: "EchoError",
+			Handler:    _TestAPIService_EchoError_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "testapi/v1/testapi.proto",
+	Metadata: "certcounter/v1/testapi.proto",
 }

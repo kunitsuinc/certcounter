@@ -4,7 +4,7 @@
 // - protoc             (unknown)
 // source: certcounter/v1/certificates.proto
 
-package certcounterv1
+package v1
 
 import (
 	context "context"
