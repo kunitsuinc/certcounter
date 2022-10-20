@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kunitsuinc/certcounter/pkg/config"
-	"github.com/kunitsuinc/certcounter/pkg/consts"
 	"github.com/kunitsuinc/certcounter/pkg/controller/router"
 	"github.com/kunitsuinc/certcounter/pkg/errors"
 	"github.com/kunitsuinc/certcounter/pkg/traces"
@@ -26,7 +25,7 @@ func CertCounter(ctx context.Context, l *rec.Logger) (serve func(errChan chan<- 
 	_ = awsProfile
 
 	// nolint: contextcheck
-	shutdownTracerProvider := traces.InitTracerProvider(traces.NewExporter(l), traces.NewResource(consts.AppName, config.Version()), l)
+	shutdownTracerProvider := traces.InitTracerProvider(l)
 
 	address := fmt.Sprintf("%s:%d", config.Addr(), config.Port())
 

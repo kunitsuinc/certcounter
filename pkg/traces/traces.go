@@ -12,7 +12,6 @@ import (
 	"github.com/kunitsuinc/rec.go"
 	"github.com/kunitsuinc/util.go/must"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -31,8 +30,8 @@ func (noop *noopSpanExporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// NewExporter TODO.
-func NewExporter(l *rec.Logger) sdktrace.SpanExporter {
+// newExporter TODO.
+func newExporter(l *rec.Logger) sdktrace.SpanExporter {
 	spanExporter := config.SpanExporter()
 	switch spanExporter {
 	case "gcloud":
@@ -42,22 +41,21 @@ func NewExporter(l *rec.Logger) sdktrace.SpanExporter {
 			break
 		}
 		return exporter
-	case "noop":
-		return &noopSpanExporter{}
+	case "stdout":
+		return must.One(stdouttrace.New(stdouttrace.WithWriter(os.Stdout)))
 	}
 
-	return must.One(stdouttrace.New(stdouttrace.WithWriter(os.Stdout)))
+	return &noopSpanExporter{}
 }
 
-// NewResource TODO.
-func NewResource(serviceName, version string) *resource.Resource {
-	attrs := []attribute.KeyValue{
+// newResource TODO.
+func newResource(serviceName, version string) *resource.Resource {
+	return resource.NewWithAttributes(
+		semconv.SchemaURL,
 		semconv.ServiceNameKey.String(serviceName),
 		semconv.ServiceVersionKey.String(version),
 		semconv.TelemetrySDKLanguageGo,
-	}
-
-	return resource.NewWithAttributes(semconv.SchemaURL, attrs...)
+	)
 }
 
 var (
@@ -66,13 +64,13 @@ var (
 )
 
 // cf. https://github.com/open-telemetry/opentelemetry-go-contrib/blob/main/instrumentation/github.com/gorilla/mux/otelmux/example/server.go
-func InitTracerProvider(exporter sdktrace.SpanExporter, traceResource *resource.Resource, l *rec.Logger) (shutdown func()) {
+func InitTracerProvider(l *rec.Logger) (shutdown func()) {
 	l.Info("trace: 🔔 start OpenTelemetry Tracer Provider")
 
 	tracerProvider := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithBatcher(exporter),
-		sdktrace.WithResource(traceResource),
+		sdktrace.WithBatcher(newExporter(l)),
+		sdktrace.WithResource(newResource(consts.AppName, config.Version())),
 	)
 	otel.SetTracerProvider(tracerProvider)
 	tracerMutex.Lock()
