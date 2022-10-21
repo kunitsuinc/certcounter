@@ -17,6 +17,15 @@ LOCAL_CR        := ${GOMODULE}
 help: githooks ## display this help documents
 	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' ${MAKEFILE_LIST} | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: setup
+setup: githooks ## Setup tools for development
+	# direnv
+	./.bin/direnv allow
+	# buf
+	./.bin/buf --version
+	# golangci-lint
+	./.bin/golangci-lint --version
+
 .PHONY: githooks
 githooks:
 	@test -f "${PRE_PUSH}" || cp -aiv "${GITROOT}/.githooks/pre-push" "${PRE_PUSH}"
