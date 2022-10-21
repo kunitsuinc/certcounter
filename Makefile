@@ -25,27 +25,21 @@ setup: githooks ## Setup tools for development
 	./.bin/buf --version
 	# golangci-lint
 	./.bin/golangci-lint --version
+	# install-protoc-gen
+	make install-protoc-gen
 
 .PHONY: githooks
 githooks:
 	@test -f "${PRE_PUSH}" || cp -aiv "${GITROOT}/.githooks/pre-push" "${PRE_PUSH}"
 
-.PHONY: protocgens
-protocgens:
+.PHONY: install-protoc-gen
+install-protoc-gen:
 	GOBIN="${GITROOT}/.local/bin" go install \
-		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
-		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
 		google.golang.org/protobuf/cmd/protoc-gen-go \
 		google.golang.org/grpc/cmd/protoc-gen-go-grpc \
-		github.com/envoyproxy/protoc-gen-validate
-
-.PHONY: buf-mod-update
-buf-mod-update: ## Run buf mod update
-	cd proto && ${GITROOT}/.bin/buf --debug --verbose mod update
-
-.PHONY: buf
-buf: ## Run buf generate
-	cd proto && ${GITROOT}/.bin/buf --debug --verbose generate
+		github.com/envoyproxy/protoc-gen-validate \
+		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
+		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
 clean:  ## Clean up chace, etc
 		go clean -x -cache -testcache -modcache -fuzzcache
@@ -65,14 +59,19 @@ lint:  ## Run secretlint, go mod tidy, golangci-lint
 	./.bin/golangci-lint run --fix --sort-results
 	git diff --exit-code
 
-.PHONY: setup
-setup: githooks protocgens ## Setup tools for development
-
 .PHONY: credits
 credits:  ## Generate CREDITS file.
 	command -v gocredits || go install github.com/Songmu/gocredits/cmd/gocredits@latest
 	gocredits . > CREDITS
 	git diff --exit-code
+
+.PHONY: buf-mod-update
+buf-mod-update: ## Run buf mod update
+	cd proto && ${GITROOT}/.bin/buf --debug --verbose mod update
+
+.PHONY: buf
+buf: ## Run buf generate
+	cd proto && ${GITROOT}/.bin/buf --debug --verbose generate
 
 .PHONY: test
 test: githooks ## Run go test and display coverage
