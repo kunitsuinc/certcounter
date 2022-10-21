@@ -52,7 +52,9 @@ clean:  ## Clean up chace, etc
 		golangci-lint cache clean
 
 .PHONY: lint
-lint:  ## Run golangci-lint after go mod tidy
+lint:  ## Run secretlint, go mod tidy, golangci-lint
+	# ref. https://github.com/secretlint/secretlint
+	docker run -v `pwd`:`pwd` -w `pwd` --rm secretlint/secretlint secretlint "**/*"
 	# tidy
 	go mod tidy
 	git diff --exit-code go.mod go.sum
@@ -62,8 +64,6 @@ lint:  ## Run golangci-lint after go mod tidy
 	# ref. https://golangci-lint.run/usage/linters/
 	./.bin/golangci-lint run --fix --sort-results
 	git diff --exit-code
-	# ref. https://github.com/secretlint/secretlint
-	docker run -v `pwd`:`pwd` -w `pwd` --rm -it secretlint/secretlint secretlint "**/*"
 
 .PHONY: setup
 setup: githooks protocgens ## Setup tools for development
