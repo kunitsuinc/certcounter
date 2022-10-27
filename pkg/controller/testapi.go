@@ -21,7 +21,7 @@ func (*TestAPIController) Echo(ctx context.Context, request *v1.TestAPIServiceEc
 	defer span.End()
 
 	if err := request.ValidateAll(); err != nil {
-		return nil, statusz.New(codes.InvalidArgument, "Bad Request", err)
+		return nil, statusz.New(codes.InvalidArgument, "Bad Request: "+err.Error(), err)
 	}
 
 	return request, nil
@@ -31,7 +31,10 @@ func (*TestAPIController) EchoError(ctx context.Context, request *v1.TestAPIServ
 	_, span := traces.Start(ctx, "EchoError")
 	defer span.End()
 
-	// s := status.New(codes.Code(request.GetCode()), request.GetMessage())
+	if err := request.ValidateAll(); err != nil {
+		return nil, statusz.New(codes.InvalidArgument, "Bad Request: "+err.Error(), err)
+	}
+
 	s := statusz.New(codes.Code(request.GetCode()), request.GetMessage(), errors.Errorf(request.GetMessage()))
 
 	d, err := s.WithDetails(request)
