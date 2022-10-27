@@ -47,8 +47,8 @@ install-protoc-gen:
 
 .PHONY: clean
 clean:  ## Clean up chace, etc
-		go clean -x -cache -testcache -modcache -fuzzcache
-		golangci-lint cache clean
+	go clean -x -cache -testcache -modcache -fuzzcache
+	golangci-lint cache clean
 
 .PHONY: lint
 lint:  ## Run secretlint, go mod tidy, golangci-lint

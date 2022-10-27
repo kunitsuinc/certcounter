@@ -7,7 +7,7 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v0.6.13
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.12.0
-	github.com/kunitsuinc/grpcutil.go v0.0.4-0.20221027193219-1317fe7c9ed6
+	github.com/kunitsuinc/grpcutil.go v0.0.4-0.20221027200504-c6fd64df16ea
 	github.com/kunitsuinc/rec.go v0.0.2
 	github.com/kunitsuinc/util.go v0.0.15
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.36.1
