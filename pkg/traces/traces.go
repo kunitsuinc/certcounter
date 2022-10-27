@@ -6,11 +6,7 @@ import (
 	"sync"
 
 	gcloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	"github.com/kunitsuinc/certcounter/pkg/config"
-	"github.com/kunitsuinc/certcounter/pkg/consts"
-	"github.com/kunitsuinc/certcounter/pkg/errors"
 	"github.com/kunitsuinc/rec.go"
-	"github.com/kunitsuinc/util.go/must"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
@@ -18,6 +14,11 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
+
+	v1 "github.com/kunitsuinc/certcounter/generated/go/certcounter/v1"
+	"github.com/kunitsuinc/certcounter/pkg/config"
+	"github.com/kunitsuinc/certcounter/pkg/consts"
+	"github.com/kunitsuinc/certcounter/pkg/errors"
 )
 
 type noopSpanExporter struct{}
@@ -30,25 +31,33 @@ func (noop *noopSpanExporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// newExporter TODO.
+// newExporter is
+//
+//nolint:ireturn
 func newExporter(l *rec.Logger) sdktrace.SpanExporter {
 	spanExporter := config.SpanExporter()
 	switch spanExporter {
-	case "gcloud":
+	case v1.SpanExporter_gcloud.String():
 		exporter, err := gcloudtrace.New(gcloudtrace.WithProjectID(config.GoogleCloudProject()))
 		if err != nil {
 			l.With(rec.Error(errors.Errorf("gcloudtrace.New: %w", err))).F().Errorf("trace: %s: gcloudtrace.New: %v", spanExporter, err)
 			break
 		}
 		return exporter
-	case "stdout":
-		return must.One(stdouttrace.New(stdouttrace.WithWriter(os.Stdout)))
+	case v1.SpanExporter_stdout.String():
+		exporter, err := stdouttrace.New(stdouttrace.WithWriter(os.Stdout))
+		if err != nil {
+			err = errors.Errorf("stdouttrace.New: %w", err)
+			l.With(rec.Error(err)).F().Errorf("trace: %s: %v", spanExporter, err)
+			break
+		}
+		return exporter
 	}
 
 	return &noopSpanExporter{}
 }
 
-// newResource TODO.
+// newResource is.
 func newResource(serviceName, version string) *resource.Resource {
 	return resource.NewWithAttributes(
 		semconv.SchemaURL,
@@ -63,6 +72,7 @@ var (
 	tracerMutex = &sync.Mutex{} //nolint: gochecknoglobals
 )
 
+// InitTracerProvider is
 // cf. https://github.com/open-telemetry/opentelemetry-go-contrib/blob/main/instrumentation/github.com/gorilla/mux/otelmux/example/server.go
 func InitTracerProvider(l *rec.Logger) (shutdown func()) {
 	l.Info("trace: 🔔 start OpenTelemetry Tracer Provider")
@@ -100,12 +110,15 @@ func InitTracerProvider(l *rec.Logger) (shutdown func()) {
 	return shutdown
 }
 
+// Start
+//
+//nolint:ireturn
 func Start(parent context.Context, spanName string, opts ...trace.SpanStartOption) (child context.Context, span trace.Span) {
 	return tracer.Start(parent, spanName, opts...)
 }
 
 func StartFunc(parent context.Context, spanName string, opts ...trace.SpanStartOption) func(spanFunction func(child context.Context) (err error)) error {
-	return func(spanFunction func(context.Context) error) error {
+	return func(spanFunction func(child context.Context) error) error {
 		child, span := Start(parent, spanName, opts...)
 		defer span.End()
 

@@ -32,7 +32,7 @@ var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
 func request_TestAPIService_Echo_0(ctx context.Context, marshaler runtime.Marshaler, client TestAPIServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TestAPIServiceEchoRequest
+	var protoReq TestAPIServiceEchoRequestResponse
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -49,7 +49,7 @@ func request_TestAPIService_Echo_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 func local_request_TestAPIService_Echo_0(ctx context.Context, marshaler runtime.Marshaler, server TestAPIServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TestAPIServiceEchoRequest
+	var protoReq TestAPIServiceEchoRequestResponse
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)

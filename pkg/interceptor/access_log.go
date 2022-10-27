@@ -2,27 +2,34 @@ package interceptor
 
 import (
 	"context"
-	"path"
+	"strconv"
 
 	"github.com/kunitsuinc/rec.go"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func AccessLogInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		l := rec.ContextLogger(ctx)
-		l = l.With(
-			rec.String("grpc.service", path.Dir(info.FullMethod)[1:]),
-			rec.String("grpc.method", path.Base(info.FullMethod)),
-			rec.String("grpc.fullMethod", info.FullMethod),
-		)
 
 		panicked := true
 
 		defer func() {
+			var code codes.Code
+			if err != nil {
+				if s, ok := status.FromError(err); ok {
+					code = s.Code()
+				}
+			}
+			if panicked {
+				code = codes.Internal
+			}
+
 			// NOTE: 無名関数で囲わないと err == nil や panicked == true をキャプチャしてしまう
 			success := err == nil && !panicked
-			l.With(rec.Bool("success", success)).F().Infof("access: grpc.method=%s success=%t", info.FullMethod, success)
+			l.Info("access: "+code.String()+" code="+strconv.FormatUint(uint64(code), 10)+" success="+strconv.FormatBool(success)+" grpc.fullMethod="+info.FullMethod, rec.Uint32("grpc.code", uint32(code)), rec.Bool("success", success))
 		}()
 
 		resp, err = handler(ctx, req)

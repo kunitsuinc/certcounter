@@ -2,18 +2,20 @@ package entrypoint
 
 import (
 	"context"
-	"fmt"
+	"net"
 	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/kunitsuinc/certcounter/pkg/config"
-	"github.com/kunitsuinc/certcounter/pkg/controller/router"
-	"github.com/kunitsuinc/certcounter/pkg/errors"
-	"github.com/kunitsuinc/certcounter/pkg/traces"
-	"github.com/kunitsuinc/grpcutil.go/grpcz"
+	grpcz "github.com/kunitsuinc/grpcutil.go/grpc"
 	"github.com/kunitsuinc/rec.go"
 	"github.com/kunitsuinc/util.go/must"
 	"golang.org/x/net/http2"
+
+	"github.com/kunitsuinc/certcounter/pkg/config"
+	"github.com/kunitsuinc/certcounter/pkg/errors"
+	"github.com/kunitsuinc/certcounter/pkg/router"
+	"github.com/kunitsuinc/certcounter/pkg/traces"
 )
 
 func CertCounter(ctx context.Context, l *rec.Logger) (serve func(errChan chan<- error), shutdown func() error) {
@@ -24,17 +26,15 @@ func CertCounter(ctx context.Context, l *rec.Logger) (serve func(errChan chan<- 
 	_ = gcpProjectID
 	_ = awsProfile
 
-	// nolint: contextcheck
+	//nolint:contextcheck
 	shutdownTracerProvider := traces.InitTracerProvider(l)
 
-	address := fmt.Sprintf("%s:%d", config.Addr(), config.Port())
-
-	grpcGatewayRouter := must.One(router.NewGRPCGatewayRouter(ctx, address, l))
-
-	mux := http.NewServeMux()
-	mux.Handle("/", grpcGatewayRouter)
+	address := net.JoinHostPort(config.Addr(), strconv.Itoa(config.Port()))
 
 	grpcServer := router.NewGRPCServer(l)
+
+	mux := http.NewServeMux()
+	mux.Handle("/", must.One(router.NewRouter(ctx, address, l)))
 
 	server := &http.Server{
 		Addr:              address,

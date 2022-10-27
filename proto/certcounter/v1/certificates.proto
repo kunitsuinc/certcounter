@@ -11,15 +11,24 @@ import "validate/validate.proto";
 // Application
 //
 
-// buf:lint:ignore ENUM_VALUE_UPPER_SNAKE_CASE
-// buf:lint:ignore ENUM_VALUE_PREFIX
-enum DNSProvider {
-  DNS_PROVIDER_UNSPECIFIED = 0;
-  gcloud = 1;
+message DNSProvider {
+  // buf:lint:ignore ENUM_VALUE_UPPER_SNAKE_CASE
+  // buf:lint:ignore ENUM_VALUE_PREFIX
+  enum DNSProvider {
+    DNS_PROVIDER_UNSPECIFIED = 0;
+    gcloud = 1;
+  }
 }
 
 message CertificatesServiceIssueRequest {
-  string vault_provider = 1 [(validate.rules).string = { in: [ "gcloud" ] }];
+  // buf:lint:ignore ENUM_VALUE_UPPER_SNAKE_CASE
+  // buf:lint:ignore ENUM_VALUE_PREFIX
+  enum DNSProvider {
+    DNS_PROVIDER_UNSPECIFIED = 0;
+    gcloud = 1;
+  }
+
+  DNSProvider vault_provider = 1 [(validate.rules).enum = { in: [ 1 ] }];
   string acme_account_key_vault_resource = 2
       [(validate.rules).string.min_len = 1];
   string private_key_vault_resource = 3 [(validate.rules).string.min_len = 1];

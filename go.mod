@@ -6,10 +6,10 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.9.0
 	github.com/envoyproxy/protoc-gen-validate v0.6.13
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.11.3
-	github.com/kunitsuinc/grpcutil.go v0.0.1
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.12.0
+	github.com/kunitsuinc/grpcutil.go v0.0.4-0.20221027193219-1317fe7c9ed6
 	github.com/kunitsuinc/rec.go v0.0.2
-	github.com/kunitsuinc/util.go v0.0.14
+	github.com/kunitsuinc/util.go v0.0.15
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.36.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.0
 	go.opentelemetry.io/otel v1.10.0
@@ -18,8 +18,8 @@ require (
 	go.opentelemetry.io/otel/trace v1.10.0
 	golang.org/x/net v0.0.0-20221004154528-8021a29435af
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
-	google.golang.org/genproto v0.0.0-20220930163606-c98284e70a91
-	google.golang.org/grpc v1.50.0
+	google.golang.org/genproto v0.0.0-20221014213838-99cd37c6964a
+	google.golang.org/grpc v1.50.1
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.28.1
 )
@@ -48,9 +48,9 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
-	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094 // indirect
+	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
 	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/text v0.3.8 // indirect
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/api v0.84.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

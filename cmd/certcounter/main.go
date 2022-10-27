@@ -7,13 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/kunitsuinc/rec.go"
+	"github.com/kunitsuinc/util.go/contextz"
+	"github.com/kunitsuinc/util.go/must"
+
 	"github.com/kunitsuinc/certcounter/pkg/config"
 	"github.com/kunitsuinc/certcounter/pkg/consts"
 	"github.com/kunitsuinc/certcounter/pkg/entrypoint"
 	"github.com/kunitsuinc/certcounter/pkg/errors"
-	"github.com/kunitsuinc/rec.go"
-	"github.com/kunitsuinc/util.go/contextz"
-	"github.com/kunitsuinc/util.go/must"
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 	}
 }
 
-// nolint: cyclop
+//nolint:cyclop
 func Main(ctx context.Context, l *rec.Logger) error {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)

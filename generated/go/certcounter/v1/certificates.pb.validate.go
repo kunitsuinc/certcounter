@@ -35,6 +35,105 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on DNSProvider with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *DNSProvider) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DNSProvider with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in DNSProviderMultiError, or
+// nil if none found.
+func (m *DNSProvider) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DNSProvider) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return DNSProviderMultiError(errors)
+	}
+
+	return nil
+}
+
+// DNSProviderMultiError is an error wrapping multiple validation errors
+// returned by DNSProvider.ValidateAll() if the designated constraints aren't met.
+type DNSProviderMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DNSProviderMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DNSProviderMultiError) AllErrors() []error { return m }
+
+// DNSProviderValidationError is the validation error returned by
+// DNSProvider.Validate if the designated constraints aren't met.
+type DNSProviderValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DNSProviderValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DNSProviderValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DNSProviderValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DNSProviderValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DNSProviderValidationError) ErrorName() string { return "DNSProviderValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DNSProviderValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDNSProvider.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DNSProviderValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DNSProviderValidationError{}
+
 // Validate checks the field values on CertificatesServiceIssueRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -60,7 +159,7 @@ func (m *CertificatesServiceIssueRequest) validate(all bool) error {
 	if _, ok := _CertificatesServiceIssueRequest_VaultProvider_InLookup[m.GetVaultProvider()]; !ok {
 		err := CertificatesServiceIssueRequestValidationError{
 			field:  "VaultProvider",
-			reason: "value must be in list [gcloud]",
+			reason: "value must be in list [1]",
 		}
 		if !all {
 			return err
@@ -296,8 +395,8 @@ var _ interface {
 	ErrorName() string
 } = CertificatesServiceIssueRequestValidationError{}
 
-var _CertificatesServiceIssueRequest_VaultProvider_InLookup = map[string]struct{}{
-	"gcloud": {},
+var _CertificatesServiceIssueRequest_VaultProvider_InLookup = map[CertificatesServiceIssueRequest_DNSProvider]struct{}{
+	1: {},
 }
 
 var _CertificatesServiceIssueRequest_KeyAlgorithm_InLookup = map[string]struct{}{

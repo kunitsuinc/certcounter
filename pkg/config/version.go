@@ -4,7 +4,7 @@ import (
 	"runtime/debug"
 )
 
-// nolint: deadcode,gochecknoglobals,unused,varcheck
+//nolint:deadcode,gochecknoglobals,unused,varcheck
 var (
 	subcommandVersion bool
 	version           string
@@ -13,7 +13,7 @@ var (
 	timestamp         string
 )
 
-// nolint: gochecknoglobals
+//nolint:gochecknoglobals
 var goVersion = func() string {
 	info, ok := debug.ReadBuildInfo()
 	if !ok {

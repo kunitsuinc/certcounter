@@ -24,7 +24,11 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TestAPIServiceClient interface {
 	// Echo は受け取った message を返却します
-	Echo(ctx context.Context, in *TestAPIServiceEchoRequest, opts ...grpc.CallOption) (*TestAPIServiceEchoResponse, error)
+	//
+	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+	Echo(ctx context.Context, in *TestAPIServiceEchoRequestResponse, opts ...grpc.CallOption) (*TestAPIServiceEchoRequestResponse, error)
 	// EchoError は意図的にエラーを発生させます
 	EchoError(ctx context.Context, in *TestAPIServiceEchoErrorRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -37,8 +41,8 @@ func NewTestAPIServiceClient(cc grpc.ClientConnInterface) TestAPIServiceClient {
 	return &testAPIServiceClient{cc}
 }
 
-func (c *testAPIServiceClient) Echo(ctx context.Context, in *TestAPIServiceEchoRequest, opts ...grpc.CallOption) (*TestAPIServiceEchoResponse, error) {
-	out := new(TestAPIServiceEchoResponse)
+func (c *testAPIServiceClient) Echo(ctx context.Context, in *TestAPIServiceEchoRequestResponse, opts ...grpc.CallOption) (*TestAPIServiceEchoRequestResponse, error) {
+	out := new(TestAPIServiceEchoRequestResponse)
 	err := c.cc.Invoke(ctx, "/certcounter.v1.TestAPIService/Echo", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -60,7 +64,11 @@ func (c *testAPIServiceClient) EchoError(ctx context.Context, in *TestAPIService
 // for forward compatibility
 type TestAPIServiceServer interface {
 	// Echo は受け取った message を返却します
-	Echo(context.Context, *TestAPIServiceEchoRequest) (*TestAPIServiceEchoResponse, error)
+	//
+	// buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+	// buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+	// buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+	Echo(context.Context, *TestAPIServiceEchoRequestResponse) (*TestAPIServiceEchoRequestResponse, error)
 	// EchoError は意図的にエラーを発生させます
 	EchoError(context.Context, *TestAPIServiceEchoErrorRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTestAPIServiceServer()
@@ -70,7 +78,7 @@ type TestAPIServiceServer interface {
 type UnimplementedTestAPIServiceServer struct {
 }
 
-func (UnimplementedTestAPIServiceServer) Echo(context.Context, *TestAPIServiceEchoRequest) (*TestAPIServiceEchoResponse, error) {
+func (UnimplementedTestAPIServiceServer) Echo(context.Context, *TestAPIServiceEchoRequestResponse) (*TestAPIServiceEchoRequestResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
 }
 func (UnimplementedTestAPIServiceServer) EchoError(context.Context, *TestAPIServiceEchoErrorRequest) (*emptypb.Empty, error) {
@@ -90,7 +98,7 @@ func RegisterTestAPIServiceServer(s grpc.ServiceRegistrar, srv TestAPIServiceSer
 }
 
 func _TestAPIService_Echo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TestAPIServiceEchoRequest)
+	in := new(TestAPIServiceEchoRequestResponse)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -102,7 +110,7 @@ func _TestAPIService_Echo_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/certcounter.v1.TestAPIService/Echo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TestAPIServiceServer).Echo(ctx, req.(*TestAPIServiceEchoRequest))
+		return srv.(TestAPIServiceServer).Echo(ctx, req.(*TestAPIServiceEchoRequestResponse))
 	}
 	return interceptor(ctx, in, info, handler)
 }

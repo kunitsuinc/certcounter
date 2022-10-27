@@ -12,6 +12,8 @@ GO_BUILD        := go build -o ${GO_BUILD_OUTPUT} -ldflags "-X ${GOMODULE}/pkg/c
 IMAGE_TAG       := ${REVISION}
 LOCAL_CR        := ${GOMODULE}
 
+export PATH := ${GITROOT}/.local/bin:${GITROOT}/.bin:${PATH}
+
 .DEFAULT_GOAL := help
 .PHONY: help
 help: githooks ## display this help documents
@@ -19,18 +21,20 @@ help: githooks ## display this help documents
 
 .PHONY: setup
 setup: githooks ## Setup tools for development
+	# == SETUP =====================================================
 	# direnv
-	./.bin/direnv allow
+	direnv allow .
 	# buf
-	./.bin/buf --version
+	buf --version
 	# golangci-lint
-	./.bin/golangci-lint --version
+	golangci-lint --version
 	# install-protoc-gen
 	make install-protoc-gen
+	# --------------------------------------------------------------
 
 .PHONY: githooks
 githooks:
-	@test -f "${PRE_PUSH}" || cp -aiv "${GITROOT}/.githooks/pre-push" "${PRE_PUSH}"
+	@[[ -f "${PRE_PUSH}" ]] || cp -aiv "${GITROOT}/.githooks/pre-push" "${PRE_PUSH}"
 
 .PHONY: install-protoc-gen
 install-protoc-gen:
@@ -41,6 +45,7 @@ install-protoc-gen:
 		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
 		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
+.PHONY: clean
 clean:  ## Clean up chace, etc
 		go clean -x -cache -testcache -modcache -fuzzcache
 		golangci-lint cache clean
@@ -48,15 +53,15 @@ clean:  ## Clean up chace, etc
 .PHONY: lint
 lint:  ## Run secretlint, go mod tidy, golangci-lint
 	# ref. https://github.com/secretlint/secretlint
-	docker run -v `pwd`:`pwd` -w `pwd` --rm secretlint/secretlint secretlint "**/*"
+	docker run -v "`pwd`:`pwd`" -w "`pwd`" --rm secretlint/secretlint secretlint "**/*"
 	# tidy
 	go mod tidy
 	git diff --exit-code go.mod go.sum
 	# buf
-	buf lint ./proto
+	buf lint
 	# lint
 	# ref. https://golangci-lint.run/usage/linters/
-	./.bin/golangci-lint run --fix --sort-results
+	golangci-lint run --fix --sort-results
 	git diff --exit-code
 
 .PHONY: credits
@@ -67,11 +72,11 @@ credits:  ## Generate CREDITS file.
 
 .PHONY: buf-mod-update
 buf-mod-update: ## Run buf mod update
-	cd proto && ${GITROOT}/.bin/buf --debug --verbose mod update
+	buf --debug --verbose mod update
 
 .PHONY: buf
 buf: ## Run buf generate
-	cd proto && ${GITROOT}/.bin/buf --debug --verbose generate
+	buf --debug --verbose generate
 
 .PHONY: test
 test: githooks ## Run go test and display coverage
@@ -109,16 +114,20 @@ gobuild: ## Run go build
 
 .PHONY: run
 run: gobuild ## Run go build and exec
-	${GO_BUILD_OUTPUT}
+	direnv exec . ${GO_BUILD_OUTPUT}
 
 .PHONY: runjq
 runjq: gobuild ## Run go build and exec with jq
-	${GO_BUILD_OUTPUT} | ./.bin/jqlog
+	make run | jqlog
 
 .PHONY: air
 air:  ## Run air
 	@[[ -x "${GITROOT}/.local/bin/air" ]] || bash -cx "curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b ${GITROOT}/.local/bin && chmod +x ${GITROOT}/.local/bin/air"
-	air -tmp_dir ./.tmp -log.time true -build.send_interrupt true -build.exclude_regex "_test\.go" -build.cmd '${GO_BUILD}' -build.bin '${GO_BUILD_OUTPUT}'
+	air -tmp_dir ./.tmp -log.time true -build.exclude_regex "_test\.go" -build.cmd '${GO_BUILD}' -build.bin 'direnv exec . ${GO_BUILD_OUTPUT}'
+
+.PHONY: airjq
+airjq:  ## Run air with jq
+	make air | ./.bin/jqlog
 
 .PHONY: build
 build:  ## docker build -t ${LOCAL_CR}:${IMAGE_TAG}

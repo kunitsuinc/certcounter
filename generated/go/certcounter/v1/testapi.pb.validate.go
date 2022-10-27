@@ -35,22 +35,23 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on TestAPIServiceEchoRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *TestAPIServiceEchoRequest) Validate() error {
+// Validate checks the field values on TestAPIServiceEchoRequestResponse with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *TestAPIServiceEchoRequestResponse) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on TestAPIServiceEchoRequest with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// TestAPIServiceEchoRequestMultiError, or nil if none found.
-func (m *TestAPIServiceEchoRequest) ValidateAll() error {
+// ValidateAll checks the field values on TestAPIServiceEchoRequestResponse
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// TestAPIServiceEchoRequestResponseMultiError, or nil if none found.
+func (m *TestAPIServiceEchoRequestResponse) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *TestAPIServiceEchoRequest) validate(all bool) error {
+func (m *TestAPIServiceEchoRequestResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -58,7 +59,7 @@ func (m *TestAPIServiceEchoRequest) validate(all bool) error {
 	var errors []error
 
 	if utf8.RuneCountInString(m.GetMessage()) < 1 {
-		err := TestAPIServiceEchoRequestValidationError{
+		err := TestAPIServiceEchoRequestResponseValidationError{
 			field:  "Message",
 			reason: "value length must be at least 1 runes",
 		}
@@ -69,19 +70,20 @@ func (m *TestAPIServiceEchoRequest) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return TestAPIServiceEchoRequestMultiError(errors)
+		return TestAPIServiceEchoRequestResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// TestAPIServiceEchoRequestMultiError is an error wrapping multiple validation
-// errors returned by TestAPIServiceEchoRequest.ValidateAll() if the
-// designated constraints aren't met.
-type TestAPIServiceEchoRequestMultiError []error
+// TestAPIServiceEchoRequestResponseMultiError is an error wrapping multiple
+// validation errors returned by
+// TestAPIServiceEchoRequestResponse.ValidateAll() if the designated
+// constraints aren't met.
+type TestAPIServiceEchoRequestResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m TestAPIServiceEchoRequestMultiError) Error() string {
+func (m TestAPIServiceEchoRequestResponseMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -90,11 +92,12 @@ func (m TestAPIServiceEchoRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m TestAPIServiceEchoRequestMultiError) AllErrors() []error { return m }
+func (m TestAPIServiceEchoRequestResponseMultiError) AllErrors() []error { return m }
 
-// TestAPIServiceEchoRequestValidationError is the validation error returned by
-// TestAPIServiceEchoRequest.Validate if the designated constraints aren't met.
-type TestAPIServiceEchoRequestValidationError struct {
+// TestAPIServiceEchoRequestResponseValidationError is the validation error
+// returned by TestAPIServiceEchoRequestResponse.Validate if the designated
+// constraints aren't met.
+type TestAPIServiceEchoRequestResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -102,24 +105,24 @@ type TestAPIServiceEchoRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e TestAPIServiceEchoRequestValidationError) Field() string { return e.field }
+func (e TestAPIServiceEchoRequestResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e TestAPIServiceEchoRequestValidationError) Reason() string { return e.reason }
+func (e TestAPIServiceEchoRequestResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e TestAPIServiceEchoRequestValidationError) Cause() error { return e.cause }
+func (e TestAPIServiceEchoRequestResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e TestAPIServiceEchoRequestValidationError) Key() bool { return e.key }
+func (e TestAPIServiceEchoRequestResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e TestAPIServiceEchoRequestValidationError) ErrorName() string {
-	return "TestAPIServiceEchoRequestValidationError"
+func (e TestAPIServiceEchoRequestResponseValidationError) ErrorName() string {
+	return "TestAPIServiceEchoRequestResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e TestAPIServiceEchoRequestValidationError) Error() string {
+func (e TestAPIServiceEchoRequestResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -131,14 +134,14 @@ func (e TestAPIServiceEchoRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sTestAPIServiceEchoRequest.%s: %s%s",
+		"invalid %sTestAPIServiceEchoRequestResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = TestAPIServiceEchoRequestValidationError{}
+var _ error = TestAPIServiceEchoRequestResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -146,111 +149,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = TestAPIServiceEchoRequestValidationError{}
-
-// Validate checks the field values on TestAPIServiceEchoResponse with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *TestAPIServiceEchoResponse) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on TestAPIServiceEchoResponse with the
-// rules defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// TestAPIServiceEchoResponseMultiError, or nil if none found.
-func (m *TestAPIServiceEchoResponse) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *TestAPIServiceEchoResponse) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Message
-
-	if len(errors) > 0 {
-		return TestAPIServiceEchoResponseMultiError(errors)
-	}
-
-	return nil
-}
-
-// TestAPIServiceEchoResponseMultiError is an error wrapping multiple
-// validation errors returned by TestAPIServiceEchoResponse.ValidateAll() if
-// the designated constraints aren't met.
-type TestAPIServiceEchoResponseMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m TestAPIServiceEchoResponseMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m TestAPIServiceEchoResponseMultiError) AllErrors() []error { return m }
-
-// TestAPIServiceEchoResponseValidationError is the validation error returned
-// by TestAPIServiceEchoResponse.Validate if the designated constraints aren't met.
-type TestAPIServiceEchoResponseValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e TestAPIServiceEchoResponseValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e TestAPIServiceEchoResponseValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e TestAPIServiceEchoResponseValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e TestAPIServiceEchoResponseValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e TestAPIServiceEchoResponseValidationError) ErrorName() string {
-	return "TestAPIServiceEchoResponseValidationError"
-}
-
-// Error satisfies the builtin error interface
-func (e TestAPIServiceEchoResponseValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sTestAPIServiceEchoResponse.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = TestAPIServiceEchoResponseValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = TestAPIServiceEchoResponseValidationError{}
+} = TestAPIServiceEchoRequestResponseValidationError{}
 
 // Validate checks the field values on TestAPIServiceEchoErrorRequest with the
 // rules defined in the proto definition for this message. If any rules are

@@ -12,12 +12,8 @@ import "validate/validate.proto";
 // TestAPI
 //
 
-message TestAPIServiceEchoRequest {
+message TestAPIServiceEchoRequestResponse {
   string message = 1 [(validate.rules).string.min_len = 1];
-}
-
-message TestAPIServiceEchoResponse {
-  string message = 1;
 }
 
 message TestAPIServiceEchoErrorRequest {
@@ -27,7 +23,12 @@ message TestAPIServiceEchoErrorRequest {
 
 service TestAPIService {
   // Echo は受け取った message を返却します
-  rpc Echo(TestAPIServiceEchoRequest) returns (TestAPIServiceEchoResponse) {
+  //
+  // buf:lint:ignore RPC_REQUEST_RESPONSE_UNIQUE
+  // buf:lint:ignore RPC_REQUEST_STANDARD_NAME
+  // buf:lint:ignore RPC_RESPONSE_STANDARD_NAME
+  rpc Echo(TestAPIServiceEchoRequestResponse)
+      returns (TestAPIServiceEchoRequestResponse) {
     option (google.api.http) = {
       post: "/api/v1/testapi/echo"
       body: "*"

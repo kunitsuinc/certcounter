@@ -8,6 +8,8 @@ deps:
   - buf.build/googleapis/googleapis
   - buf.build/envoyproxy/protoc-gen-validate
 lint:
-  allow_comment_ignores: true
   use:
     - DEFAULT
+  allow_comment_ignores: true
+  rpc_allow_google_protobuf_empty_requests: true
+  rpc_allow_google_protobuf_empty_responses: true

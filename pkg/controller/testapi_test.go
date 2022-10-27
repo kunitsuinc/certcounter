@@ -14,7 +14,7 @@ func TestTestAPIController_Echo(t *testing.T) {
 		t.Parallel()
 		tr := &controller.TestAPIController{}
 		const wantMessage = "test"
-		gotResponse, err := tr.Echo(context.Background(), &v1.TestAPIServiceEchoRequest{Message: wantMessage})
+		gotResponse, err := tr.Echo(context.Background(), &v1.TestAPIServiceEchoRequestResponse{Message: wantMessage})
 		if err != nil {
 			t.Errorf("TestAPIController.Echo() error = %v, wantErr %v", err, nil)
 			return

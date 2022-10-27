@@ -11,7 +11,7 @@ var ErrValueNotSet = errors.New("contexts: context value not set")
 
 type key int
 
-// nolint: gochecknoglobals
+//nolint:gochecknoglobals
 const (
 	_ key = iota
 	shutdownChanKey
