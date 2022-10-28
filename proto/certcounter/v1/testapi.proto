@@ -17,8 +17,8 @@ message TestAPIServiceEchoRequestResponse {
 }
 
 message TestAPIServiceEchoErrorRequest {
-  uint32 code = 1;
-  string message = 2 [(validate.rules).string.min_len = 1];
+  uint32 code = 1 [(validate.rules).uint32.gt = 0];
+  string message = 2;
 }
 
 service TestAPIService {

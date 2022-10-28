@@ -173,18 +173,18 @@ func (m *TestAPIServiceEchoErrorRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Code
-
-	if utf8.RuneCountInString(m.GetMessage()) < 1 {
+	if m.GetCode() <= 0 {
 		err := TestAPIServiceEchoErrorRequestValidationError{
-			field:  "Message",
-			reason: "value length must be at least 1 runes",
+			field:  "Code",
+			reason: "value must be greater than 0",
 		}
 		if !all {
 			return err
 		}
 		errors = append(errors, err)
 	}
+
+	// no validation rules for Message
 
 	if len(errors) > 0 {
 		return TestAPIServiceEchoErrorRequestMultiError(errors)
