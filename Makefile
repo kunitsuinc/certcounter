@@ -45,6 +45,23 @@ install-protoc-gen:
 		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
 		github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
+.PHONY: buf-mod-update
+buf-mod-update: ## Run buf mod update
+	buf --debug --verbose mod update
+
+.PHONY: buf
+buf: ## Run buf generate
+	buf --debug --verbose generate
+
+.PHONY: generate
+generate: buf ## Generate files
+
+.PHONY: credits
+credits:  ## Generate CREDITS file.
+	command -v gocredits || go install github.com/Songmu/gocredits/cmd/gocredits@latest
+	gocredits . > CREDITS
+	git diff --exit-code
+
 .PHONY: clean
 clean:  ## Clean up chace, etc
 	go clean -x -cache -testcache -modcache -fuzzcache
@@ -52,8 +69,6 @@ clean:  ## Clean up chace, etc
 
 .PHONY: lint
 lint:  ## Run secretlint, go mod tidy, golangci-lint
-	# ref. https://github.com/secretlint/secretlint
-	docker run -v "`pwd`:`pwd`" -w "`pwd`" --rm secretlint/secretlint secretlint "**/*"
 	# tidy
 	go mod tidy
 	git diff --exit-code go.mod go.sum
@@ -63,20 +78,8 @@ lint:  ## Run secretlint, go mod tidy, golangci-lint
 	# ref. https://golangci-lint.run/usage/linters/
 	golangci-lint run --fix --sort-results
 	git diff --exit-code
-
-.PHONY: credits
-credits:  ## Generate CREDITS file.
-	command -v gocredits || go install github.com/Songmu/gocredits/cmd/gocredits@latest
-	gocredits . > CREDITS
-	git diff --exit-code
-
-.PHONY: buf-mod-update
-buf-mod-update: ## Run buf mod update
-	buf --debug --verbose mod update
-
-.PHONY: buf
-buf: ## Run buf generate
-	buf --debug --verbose generate
+	# ref. https://github.com/secretlint/secretlint
+	docker run -v "`pwd`:`pwd`" -w "`pwd`" --rm secretlint/secretlint secretlint "**/*"
 
 .PHONY: test
 test: githooks ## Run go test and display coverage
@@ -85,7 +88,7 @@ test: githooks ## Run go test and display coverage
 	go tool cover -func=./coverage.txt
 
 .PHONY: ci
-ci: lint credits test ## CI command set
+ci: credits lint test ## CI command set
 
 .PHONY: goxz
 goxz: ci ## Run goxz for release files

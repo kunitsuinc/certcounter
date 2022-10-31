@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/kunitsuinc/rec.go"
-	"github.com/kunitsuinc/util.go/contextz"
+	contextz "github.com/kunitsuinc/util.go/context"
 	"github.com/kunitsuinc/util.go/must"
 
 	"github.com/kunitsuinc/certcounter/pkg/config"

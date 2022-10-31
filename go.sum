@@ -234,8 +234,8 @@ github.com/kunitsuinc/grpcutil.go v0.0.4-0.20221027200504-c6fd64df16ea h1:uxBvUE
 github.com/kunitsuinc/grpcutil.go v0.0.4-0.20221027200504-c6fd64df16ea/go.mod h1:fRpz9oclkY9f2BcNdX8uqoZ5sjJtEKpQ2q+0+IgZnQA=
 github.com/kunitsuinc/rec.go v0.0.2 h1:SSfFjIeyBjb1t5/OBtyKghRueRw2xk6hjgFNgLX9fgA=
 github.com/kunitsuinc/rec.go v0.0.2/go.mod h1:/3grmh5H6GtpKyttqRtXAoKLLOMK9RYS1hPNT5Gg4cU=
-github.com/kunitsuinc/util.go v0.0.15 h1:2HARvSeUxXM266efDx40PRXtznwpYZMoc3cXcPUVRZg=
-github.com/kunitsuinc/util.go v0.0.15/go.mod h1:irJypLuz+bCSazt3qXosGo6/KDmz66KEOYQylChHn/w=
+github.com/kunitsuinc/util.go v0.0.16 h1:4zq3EGwyLEZ0zeHx4z9ZoCSnHnmSaMczuQhevQmPcb8=
+github.com/kunitsuinc/util.go v0.0.16/go.mod h1:irJypLuz+bCSazt3qXosGo6/KDmz66KEOYQylChHn/w=
 github.com/lyft/protoc-gen-star v0.6.1 h1:erE0rdztuaDq3bpGifD95wfoPrSZc95nGA6tbiNYh6M=
 github.com/lyft/protoc-gen-star v0.6.1/go.mod h1:TGAoBVkt8w7MPG72TrKIu85MIdXwDuzJYeZuUPFPNwA=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=

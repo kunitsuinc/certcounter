@@ -14,7 +14,7 @@ import (
 	gw_runtimez "github.com/kunitsuinc/grpcutil.go/grpc-ecosystem/grpc-gateway/v2/runtime"
 	statusz "github.com/kunitsuinc/grpcutil.go/grpc/status"
 	"github.com/kunitsuinc/rec.go"
-	"github.com/kunitsuinc/util.go/net/httpz"
+	httpz "github.com/kunitsuinc/util.go/net/http"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"

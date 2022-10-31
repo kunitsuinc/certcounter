@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/kunitsuinc/rec.go"
-	"github.com/kunitsuinc/util.go/net/httpz"
+	httpz "github.com/kunitsuinc/util.go/net/http"
 )
 
 func ContextLoggerRequestMiddleware(original *rec.Logger) func(next http.Handler) http.Handler {

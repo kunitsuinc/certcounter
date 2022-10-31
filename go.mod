@@ -9,7 +9,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.12.0
 	github.com/kunitsuinc/grpcutil.go v0.0.4-0.20221027200504-c6fd64df16ea
 	github.com/kunitsuinc/rec.go v0.0.2
-	github.com/kunitsuinc/util.go v0.0.15
+	github.com/kunitsuinc/util.go v0.0.16
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.36.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.0
 	go.opentelemetry.io/otel v1.10.0
