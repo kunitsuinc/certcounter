@@ -13,8 +13,8 @@ import (
 	"golang.org/x/net/http2"
 
 	"github.com/kunitsuinc/certcounter/pkg/config"
+	"github.com/kunitsuinc/certcounter/pkg/controller"
 	"github.com/kunitsuinc/certcounter/pkg/errors"
-	"github.com/kunitsuinc/certcounter/pkg/router"
 	"github.com/kunitsuinc/certcounter/pkg/traces"
 )
 
@@ -31,10 +31,10 @@ func CertCounter(ctx context.Context, l *rec.Logger) (serve func(errChan chan<- 
 
 	address := net.JoinHostPort(config.Addr(), strconv.Itoa(config.Port()))
 
-	grpcServer := router.NewGRPCServer(l)
+	grpcServer := controller.NewGRPCServer(l)
 
 	mux := http.NewServeMux()
-	mux.Handle("/", must.One(router.NewRouter(ctx, address, l)))
+	mux.Handle("/", must.One(controller.NewRouter(ctx, address, l)))
 
 	server := &http.Server{
 		Addr:              address,

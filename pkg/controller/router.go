@@ -1,4 +1,4 @@
-package router
+package controller
 
 import (
 	"context"
@@ -27,7 +27,6 @@ import (
 	v1 "github.com/kunitsuinc/certcounter/generated/go/certcounter/v1"
 	"github.com/kunitsuinc/certcounter/pkg/config"
 	"github.com/kunitsuinc/certcounter/pkg/consts"
-	"github.com/kunitsuinc/certcounter/pkg/controller"
 	"github.com/kunitsuinc/certcounter/pkg/errors"
 	"github.com/kunitsuinc/certcounter/pkg/interceptor"
 	"github.com/kunitsuinc/certcounter/pkg/middleware"
@@ -35,7 +34,7 @@ import (
 
 func registerGRPCServer(grpcServer *grpc.Server) *grpc.Server {
 	// NOTE: register service (1/2)
-	v1.RegisterTestAPIServiceServer(grpcServer, &controller.TestAPIController{})
+	v1.RegisterTestAPIServiceServer(grpcServer, &TestAPIController{})
 
 	return grpcServer
 }
