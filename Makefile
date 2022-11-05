@@ -53,8 +53,12 @@ buf-mod-update: ## Run buf mod update
 buf: ## Run buf generate
 	buf --debug --verbose generate
 
+.PHONY: gogenerate
+gogenerate:  ## Run go generate
+	go generate ./...
+
 .PHONY: generate
-generate: buf ## Generate files
+generate: buf gogenerate ## Generate files
 
 .PHONY: credits
 credits:  ## Generate CREDITS file.
@@ -63,8 +67,12 @@ credits:  ## Generate CREDITS file.
 	git diff --exit-code
 
 .PHONY: clean
-clean:  ## Clean up chace, etc
+clean:  ## Clean up cache, etc
+	# go build cache
+	go env GOCACHE
 	go clean -x -cache -testcache -modcache -fuzzcache
+	# golangci-lint cache
+	golangci-lint cache status
 	golangci-lint cache clean
 
 .PHONY: lint

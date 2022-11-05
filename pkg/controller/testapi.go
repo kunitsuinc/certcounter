@@ -20,8 +20,8 @@ func (*TestAPIController) Echo(ctx context.Context, request *v1.TestAPIServiceEc
 	_, span := traces.Start(ctx, "Echo")
 	defer span.End()
 
-	if err := request.ValidateAll(); err != nil {
-		return nil, statusz.New(codes.InvalidArgument, "Bad Request: "+err.Error(), err)
+	if err := request.Validate(); err != nil {
+		return nil, statusz.New(codes.InvalidArgument, "InvalidArgument: "+err.Error(), errors.Errorf("request.Validate: %w", err))
 	}
 
 	return request, nil
@@ -31,15 +31,15 @@ func (*TestAPIController) EchoError(ctx context.Context, request *v1.TestAPIServ
 	_, span := traces.Start(ctx, "EchoError")
 	defer span.End()
 
-	if err := request.ValidateAll(); err != nil {
-		return nil, statusz.New(codes.InvalidArgument, "Bad Request: "+err.Error(), err)
+	if err := request.Validate(); err != nil {
+		return nil, statusz.New(codes.InvalidArgument, "InvalidArgument: "+err.Error(), errors.Errorf("request.Validate: %w", err))
 	}
 
 	s := statusz.New(codes.Code(request.GetCode()), request.GetMessage(), errors.Errorf(request.GetMessage()))
 
 	d, err := s.WithDetails(request)
 	if err != nil {
-		return nil, errors.Errorf("(*status.Status).WithDetails: %w", err)
+		return nil, statusz.New(codes.Internal, "Internal: "+err.Error(), errors.Errorf("(*status.Status).WithDetails: %w", err))
 	}
 
 	return nil, d

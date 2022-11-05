@@ -4,13 +4,13 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
-	"time"
+	"syscall"
 
 	grpcz "github.com/kunitsuinc/grpcutil.go/grpc"
 	"github.com/kunitsuinc/rec.go"
 	"github.com/kunitsuinc/util.go/must"
-	"golang.org/x/net/http2"
 
 	"github.com/kunitsuinc/certcounter/pkg/config"
 	"github.com/kunitsuinc/certcounter/pkg/controller"
@@ -18,7 +18,7 @@ import (
 	"github.com/kunitsuinc/certcounter/pkg/traces"
 )
 
-func CertCounter(ctx context.Context, l *rec.Logger) (serve func(errChan chan<- error), shutdown func() error) {
+func CertCounter(ctx context.Context, l *rec.Logger) error {
 	gcpProjectID := config.GoogleCloudProject()
 	awsProfile := config.AWSProfile()
 	shutdownTimeout := config.ShutdownTimeout()
@@ -28,51 +28,40 @@ func CertCounter(ctx context.Context, l *rec.Logger) (serve func(errChan chan<- 
 
 	//nolint:contextcheck
 	shutdownTracerProvider := traces.InitTracerProvider(l)
+	defer shutdownTracerProvider()
 
 	address := net.JoinHostPort(config.Addr(), strconv.Itoa(config.Port()))
-
-	grpcServer := controller.NewGRPCServer(l)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", must.One(controller.NewRouter(ctx, address, l)))
 
-	server := &http.Server{
-		Addr:              address,
-		Handler:           grpcz.GRPCHandler(grpcServer, mux, &http2.Server{}),
-		ReadHeaderTimeout: 10 * time.Second,
-	}
+	l.F().Infof("🔊 start gRPC Server with gRPC-Gateway: %s", address)
+	defer l.F().Infof("🔇 shutdown gRPC Server with gRPC-Gateway: %s", address)
 
-	serve = func(errChan chan<- error) {
-		l.F().Infof("🔊 start gRPC Server with gRPC-Gateway: %s", address)
-		defer l.F().Infof("🔇 shutdown gRPC Server and gRPC-Gateway: %s", address)
-
-		if err := server.ListenAndServe(); err != nil {
-			if errors.Is(err, http.ErrServerClosed) {
-				l.Info(err.Error())
-				errChan <- nil
-				return
+	if err := grpcz.ServeGRPC(
+		ctx,
+		must.One(net.Listen("tcp", address)),
+		controller.NewGRPCServer(l),
+		mux,
+		grpcz.WithContinueSignalHandler(func(sig os.Signal) bool {
+			if sig == syscall.SIGHUP {
+				l.Info("main: reload config")
+				rollback, err := config.Load(l)
+				if err != nil {
+					l.Warning("main: failed to load config. rollback")
+					rollback()
+				}
+				return true
 			}
-
-			errChan <- errors.Errorf("http.Serve: %w", err)
-			return
-		}
-
-		errChan <- nil
+			return false
+		}),
+		grpcz.WithShutdownTimeout(shutdownTimeout),
+		grpcz.WithShutdownErrorHandler(func(err error) {
+			l.With(rec.Error(err), rec.ErrorStacktrace(err)).F().Errorf("main: %v", err)
+		}),
+	); err != nil {
+		return errors.Errorf("grpcz.ServeGRPC: %w", err)
 	}
 
-	shutdown = func() error {
-		grpcServer.GracefulStop()
-
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			return errors.Errorf("server.Shutdown: %w", err)
-		}
-
-		shutdownTracerProvider()
-
-		return nil
-	}
-
-	return serve, shutdown
+	return nil
 }
